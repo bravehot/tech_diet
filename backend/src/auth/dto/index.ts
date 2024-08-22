@@ -6,6 +6,17 @@ export class PhoneDto {
   phone: string;
 }
 
+export class PasswordDto {
+  @Matches(
+    /^(?=.*[A-Za-z])(?=.*[0-9])|(?=.*[A-Za-z])(?=.*[!@#$%^&*()_+|~=`{}\[\]:";'<>?,./\\-])|(?=.*[0-9])(?=.*[!@#$%^&*()_+|~=`{}\[\]:";'<>?,./\\-])[A-Za-z0-9!@#$%^&*()_+|~=`{}\[\]:";'<>?,./\\-]{8,14}$/,
+    {
+      message: '长度为8~14个字符, 字母/数字以及标点符号至少包含2种',
+    },
+  )
+  @Length(8, 14, { message: '长度为8~14个字符' })
+  password: string;
+}
+
 export class RegisterDto extends PhoneDto {
   @Matches(
     /^(?=.*[A-Za-z])(?=.*[0-9])|(?=.*[A-Za-z])(?=.*[!@#$%^&*()_+|~=`{}\[\]:";'<>?,./\\-])|(?=.*[0-9])(?=.*[!@#$%^&*()_+|~=`{}\[\]:";'<>?,./\\-])[A-Za-z0-9!@#$%^&*()_+|~=`{}\[\]:";'<>?,./\\-]{8,14}$/,
@@ -23,6 +34,9 @@ export class RegisterDto extends PhoneDto {
 export class smsDto extends PhoneDto {
   @Length(4, 4, { message: '请输入验证码' })
   captcha: string;
+
+  @IsString()
+  templateID: string;
 }
 
 export class LoginByPasswordDto extends PhoneDto {

@@ -8,21 +8,22 @@ datasource db {
 }
 
 model User {
-  id          String    @id @default(uuid())
-  phone       String    @unique
-  password    String?
-  name        String?
-  avatar      String?
-  gender      String?
-  birthday    DateTime?
-  address     String?
-  email       String?
-  loginCount  Int       @default(0)
-  lastLoginAt DateTime?
-  isLockEmail Boolean   @default(false)
-  isDisabled  Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id            String    @id @default(uuid())
+  phone         String    @unique
+  password      String?
+  name          String?
+  avatar        String?
+  gender        String?
+  birthday      DateTime?
+  address       String?
+  email         String?
+  loginCount    Int       @default(0)
+  lastLoginAt   DateTime?
+  isLockEmail   Boolean   @default(false)
+  isDisabled    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  isSetPassword Boolean   @default(false)
 
   Post        Post[]
   Preferences Preferences[]

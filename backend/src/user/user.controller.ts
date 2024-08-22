@@ -1,9 +1,10 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
 import { UserService } from './user.service';
 import { ConfigService } from '@nestjs/config';
+import { SetPasswordDto } from './dto';
 
 @Controller('user')
 export class UserController {
@@ -21,5 +22,17 @@ export class UserController {
     });
 
     return this.userService.profile(payload);
+  }
+
+  @Post('setPassword')
+  async setPassword(
+    @Req() req: Request,
+    @Body() setPasswordDto: SetPasswordDto,
+  ) {
+    const [, token] = req.headers.authorization?.split(' ') ?? [];
+    const payload = await this.jwtService.verifyAsync(token, {
+      secret: this.configService.get('JWT_SECRET'),
+    });
+    return this.userService.setPassword(setPasswordDto, payload);
   }
 }

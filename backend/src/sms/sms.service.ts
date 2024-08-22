@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { smsTemplateEnum } from 'src/@type/enum';
+import { SmsTemplateEnum } from 'src/@type/enum';
 
 @Injectable()
 export class SmsService {
@@ -13,7 +13,7 @@ export class SmsService {
   async sendSms(
     phone: string,
     code: string | number,
-    templateId: smsTemplateEnum,
+    templateId: SmsTemplateEnum,
   ) {
     const params = {
       SmsSdkAppId: this.configService.get('SMS_SECRET_ID'),

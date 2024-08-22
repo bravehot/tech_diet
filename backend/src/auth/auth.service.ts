@@ -17,7 +17,7 @@ import {
 
 import { getRandomSmsCode } from 'src/utils';
 
-import { smsTemplateEnum } from 'src/@type/enum';
+import { SmsTemplateEnum } from 'src/@type/enum';
 
 @Injectable()
 export class AuthService {
@@ -48,8 +48,8 @@ export class AuthService {
 
   async loginByPhone(loginDto: LoginByPhoneDto) {
     const { phone, smsCode } = loginDto;
-
-    if (smsCode !== (await this.redisService.get(phone))) {
+    const redisKey = `${phone}_${SmsTemplateEnum.LOGIN}`;
+    if (smsCode !== (await this.redisService.get(redisKey))) {
       throw new HttpException('验证码错误', HttpStatus.INTERNAL_SERVER_ERROR);
     }
     const user = await this.prismaService.user.findUnique({
@@ -58,18 +58,28 @@ export class AuthService {
       },
     });
 
+    let jwtSignInfo = null;
+    // 如果用户不存在，则自动创建创建用户
     if (!user) {
-      throw new HttpException('用户不存在', HttpStatus.INTERNAL_SERVER_ERROR);
+      const newUser = await this.prismaService.user.create({
+        data: {
+          phone,
+          password: '',
+          isSetPassword: false,
+        },
+      });
+      jwtSignInfo = {
+        userId: newUser.id,
+        phone: newUser.phone,
+      };
+    } else {
+      jwtSignInfo = {
+        userId: user.id,
+        phone: user.phone,
+      };
     }
-
-    const jwtSignInfo = {
-      userId: user.id,
-      phone: user.phone,
-    };
-
-    await this.redisService.del(phone);
     const tokenInfo = this.getTokenInfo(jwtSignInfo);
-
+    await this.redisService.del(redisKey);
     return tokenInfo;
   }
 
@@ -120,6 +130,7 @@ export class AuthService {
       data: {
         phone,
         password: await bcrypt.hash(password, 10),
+        isSetPassword: true,
       },
     });
 
@@ -134,7 +145,7 @@ export class AuthService {
   }
 
   async sendSms(sendSmsDto: smsDto) {
-    const { phone, captcha } = sendSmsDto;
+    const { phone, captcha, templateID } = sendSmsDto;
     const captchaText = await this.redisService.get(captcha);
     if (!captchaText) {
       throw new HttpException('验证码已过期', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -145,7 +156,9 @@ export class AuthService {
 
     await this.redisService.del(captcha);
 
-    const smsCode = await this.redisService.get(phone);
+    const redisKey = `${phone}_${templateID}`;
+
+    const smsCode = await this.redisService.get(redisKey);
     if (smsCode) {
       throw new HttpException(
         '验证码已发送，请稍后再试',
@@ -154,8 +167,8 @@ export class AuthService {
     }
 
     const code = getRandomSmsCode();
-    await this.redisService.set(phone, code, 60);
-    await this.smsService.sendSms(phone, code, smsTemplateEnum.LOGIN);
+    await this.redisService.set(redisKey, code, 60);
+    await this.smsService.sendSms(phone, code, SmsTemplateEnum.LOGIN);
 
     return code;
   }
@@ -163,6 +176,7 @@ export class AuthService {
   async getCaptcha() {
     const captcha = svgCaptcha.create();
     await this.redisService.set(captcha.text, captcha.text, 60);
+    console.log('captcha: ', captcha.text);
     return captcha;
   }
 }

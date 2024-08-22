@@ -1,4 +1,5 @@
 import { IsString } from 'class-validator';
+import { RegisterDto } from 'src/auth/dto';
 
 export class ProfileDto {
   @IsString()
@@ -7,3 +8,5 @@ export class ProfileDto {
   @IsString()
   phone: string;
 }
+
+export class SetPasswordDto extends RegisterDto {}
