@@ -59,7 +59,7 @@ export class AuthService {
     });
 
     let jwtSignInfo = null;
-    // 如果用户不存在，则自动创建创建用户
+    // if the user not exist, create the new user
     if (!user) {
       const newUser = await this.prismaService.user.create({
         data: {
@@ -145,7 +145,7 @@ export class AuthService {
   }
 
   async sendSms(sendSmsDto: smsDto) {
-    const { phone, captcha, templateID } = sendSmsDto;
+    const { phone, captcha, templateId } = sendSmsDto;
     const captchaText = await this.redisService.get(captcha);
     if (!captchaText) {
       throw new HttpException('验证码已过期', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -156,7 +156,7 @@ export class AuthService {
 
     await this.redisService.del(captcha);
 
-    const redisKey = `${phone}_${templateID}`;
+    const redisKey = `${phone}_${templateId}`;
 
     const smsCode = await this.redisService.get(redisKey);
     if (smsCode) {

@@ -2,11 +2,12 @@ import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 
+import Toast from "@/components/Toast";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import "@/global.css";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ export default function RootLayout() {
             <Stack.Screen name="index" />
           </Stack>
         </GluestackUIProvider>
+        <Toast />
       </SafeAreaProvider>
     </QueryClientProvider>
   );
